@@ -1,0 +1,24 @@
+# Archivos de entorno
+.env
+
+# Archivos de caché
+__pycache__/
+*.pyc
+
+# Archivos de dependencias de Python
+venv/
+env/
+
+# Archivos de dependencias de Node.js
+node_modules/
+
+# Archivos de configuración de IDEs
+.vscode/
+.idea/
+
+# Archivos de sistema (macOS, Windows)
+.DS_Store
+Thumbs.db
+
+# Archivos de logs
+*.log
