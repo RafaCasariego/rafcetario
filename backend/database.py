@@ -1,17 +1,26 @@
-from databases import Database
-import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
+import os
 
+# Cargar variables de entorno
 load_dotenv()
 
-# Aquí se obtiene la URL de la base de datos desde el archivo .env
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-database = Database(DATABASE_URL)
+# Crear el motor de la base de datos
+engine = create_engine(DATABASE_URL)
 
-# Funciones para conectar y desconectar la base de datos
-async def connect_db():
-    await database.connect()
+# Crear la sesión
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-async def disconnect_db():
-    await database.disconnect()
+# Base para los modelos
+Base = declarative_base()
+
+# Dependencia para obtener la sesión de la base de datos
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
