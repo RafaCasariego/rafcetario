@@ -1,21 +1,27 @@
+"""
+Funciones para manejar las operaciones CRUD de recetas
+"""
+
 from sqlalchemy.orm import Session
 from models import Receta
 from schemas import RecetaCreate, RecetaUpdate
+from fastapi import HTTPException, status
 
 
-# Obtener todas las recetas
+# Obtener todas las recetas (cualquiera puede hacerlo)
 def get_recetas(db: Session):
     return db.query(Receta).all()
 
 
-# Crear una nueva receta
-def create_receta(db: Session, receta: RecetaCreate):
+# Crear una nueva receta (solo un usuario autenticado puede hacerlo)
+def create_receta(db: Session, receta: RecetaCreate, usuario_actual):
     nueva_receta = Receta(
         nombre=receta.nombre,
         descripcion=receta.descripcion,
         ingredientes=receta.ingredientes,
         instrucciones=receta.instrucciones,
-        tiempo_minutos=receta.tiempo_minutos
+        tiempo_minutos=receta.tiempo_minutos,
+        usuario_id=usuario_actual.id, # Asociamos la receta al usuario autenticado
     )
     db.add(nueva_receta)
     db.commit()
@@ -24,33 +30,44 @@ def create_receta(db: Session, receta: RecetaCreate):
 
 
 
-# Obtener una receta por ID
+# Obtener una receta por ID (cualquiera puede hacerlo)
 def get_receta_by_id(db: Session, receta_id: int):
     return db.query(Receta).filter(Receta.id == receta_id).first()
 
 
 
-# Eliminar una receta
-def delete_receta(db: Session, receta_id: int):
+# Eliminar una receta (solo el dueño puede hacerlo)
+def eliminar_receta(db: Session, receta_id: int, usuario_actual):
     receta = db.query(Receta).filter(Receta.id == receta_id).first()
-    if receta:
-        db.delete(receta)
-        db.commit()
-        return receta
-    return None
 
-
-
-# Modificar una receta
-def update_receta(db: Session, receta_id: int, receta_data: RecetaUpdate):
-    receta = db.query(Receta).filter(Receta.id == receta_id).first()
     if not receta:
-        return None
+        raise HTTPException(status_code=404, detail="Receta no encontrada")
+
+    if receta.usuario_id != usuario_actual.id:
+        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar esta receta")
+
+    db.delete(receta)
+    db.commit()
+    return {"mensaje": f"Receta '{receta.nombre}' eliminada con éxito"}
+
+
+
+# Modificar una receta (solo el dueño puede hacerlo)
+def modificar_receta(db: Session, receta_id: int, receta_data: RecetaUpdate, usuario_actual):
+    receta = db.query(Receta).filter(Receta.id == receta_id).first()
+
+    if not receta:
+        raise HTTPException(status_code=404, detail="Receta no encontrada")
+
+    if receta.usuario_id != usuario_actual.id:
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta receta")
+
     receta.nombre = receta_data.nombre
     receta.descripcion = receta_data.descripcion
     receta.ingredientes = receta_data.ingredientes
     receta.instrucciones = receta_data.instrucciones
     receta.tiempo_minutos = receta_data.tiempo_minutos
+
     db.commit()
     db.refresh(receta)
     return receta
