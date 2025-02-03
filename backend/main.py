@@ -13,6 +13,8 @@ from models import Receta, Usuario
 from auth.jwt import obtener_usuario_actual, crear_token
 from auth.security import verify_password
 import crud.favorito_like
+from fastapi.middleware.cors import CORSMiddleware
+
 
 
 # Crear la base de datos
@@ -21,6 +23,14 @@ Base.metadata.create_all(bind=engine)
 
 # Instancia de FastAPI
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permitir cualquier origen (puedes cambiarlo a ["http://localhost:5173"])
+    allow_credentials=True,
+    allow_methods=["*"],  # Permitir todos los métodos HTTP
+    allow_headers=["*"],  # Permitir todos los headers
+)
+
 
 
 

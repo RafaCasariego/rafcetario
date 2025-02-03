@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos globales */
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  #root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Hace que la página ocupe toda la altura */
+  }
+  
+  /* Para que el contenido empuje al footer hacia abajo */
+  .main-content {
+    flex: 1;
+  }
+  
+  /* Estilos del footer */
+  .footer {
+    background-color: #1f2937; /* Color oscuro */
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    width: 100%;
+    position: relative; /* Por si acaso */
+    bottom: 0;
+  }
+  

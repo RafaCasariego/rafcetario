@@ -17,7 +17,7 @@ API RESTful para gestionar recetas de cocina, desarrollada con FastAPI y Playwri
 🔹 Playwright (Testing de frontend)
 🔹 Swagger (Documentación interactiva)
 
-Documentación de la API: http://127.0.0.1:8000/docs
+Documentación de la API: 
 
 
 🛠️ Testing
