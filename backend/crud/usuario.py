@@ -4,9 +4,12 @@ Funciones para manejar las operaciones CRUD de usuarios
 
 from sqlalchemy.orm import Session
 from models import Usuario
-from schemas import UsuarioCreate, UsuarioLogin
+from schemas import UsuarioCreate, UsuarioLogin, UsuarioUpdate
 from auth.security import hash_password, verify_password
 from auth.jwt import crear_token
+from fastapi import HTTPException
+from models import Receta
+
 
 
 # Crea un nuevo usuario en la base de datos. Verifica si el email del usuario ya existe
@@ -50,7 +53,6 @@ def verificar_usuario_existe(db: Session, email: str) -> bool:
 
 
 
-
 # Función para devolver un token JWT al usuario si la autenticación es correcta
 def autenticar_usuario(db: Session, datos_login: UsuarioLogin):
     usuario = db.query(Usuario).filter(Usuario.email == datos_login.email).first()
@@ -62,3 +64,63 @@ def autenticar_usuario(db: Session, datos_login: UsuarioLogin):
     # Si las credenciales son correctas, generamos un token JWT
     access_token = crear_token({"sub": usuario.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+
+# Obtener el perfil del usuario autenticado
+def obtener_perfil_usuario(db: Session, usuario_actual):
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_actual.id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    return {"id": usuario.id, "nombre": usuario.nombre, "email": usuario.email}
+
+
+
+# Permite al usuario autenticado cambiar sus datos personales
+def actualizar_usuario(db: Session, usuario_actual: Usuario, datos_actualizados: UsuarioUpdate):
+    usuario_actual.nombre = datos_actualizados.nombre
+    usuario_actual.email = datos_actualizados.email
+
+    db.commit()
+    db.refresh(usuario_actual) #Actualiza el usuario en la db con sus nuevos valores
+
+    return usuario_actual
+
+
+
+# Elimina la cuenta de un usuario autenticado y sus recetas asociadas.
+def eliminar_cuenta(db: Session, usuario_actual: Usuario):
+
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_actual.id).first()
+
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    # Eliminar sus recetas primero (clave foránea)
+    db.query(Receta).filter(Receta.usuario_id == usuario.id).delete()
+
+    # Luego eliminar el usuario
+    db.delete(usuario)
+    db.commit()
+
+    return {"mensaje": "Cuenta eliminada con éxito"}
+
+
+
+# Permite a un usuario autenticado cambiar su contraseña.
+def cambiar_contraseña(db: Session, usuario_actual: Usuario, contraseña_actual: str, nueva_contraseña: str):
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_actual.id).first()
+
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    # Verificar si la contraseña actual es correcta
+    if not verify_password(contraseña_actual, usuario.password):
+        raise HTTPException(status_code=400, detail="Contraseña actual incorrecta")
+
+    # Hash de la nueva contraseña y actualización en la base de datos
+    usuario.password = hash_password(nueva_contraseña)
+    db.commit()
+
+    return {"mensaje": "Contraseña actualizada con éxito"}

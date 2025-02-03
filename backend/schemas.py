@@ -42,3 +42,9 @@ class UsuarioResponse(BaseModel):
 class UsuarioLogin(BaseModel):
     email: EmailStr
     password: str
+
+
+#Esquema para que el usuario pueda modificar sus datos
+class UsuarioUpdate(BaseModel):
+    nombre: str
+    email: EmailStr

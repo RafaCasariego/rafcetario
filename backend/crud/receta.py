@@ -71,3 +71,26 @@ def modificar_receta(db: Session, receta_id: int, receta_data: RecetaUpdate, usu
     db.commit()
     db.refresh(receta)
     return receta
+
+
+
+# Función para buscar recetas con filtros y paginación
+def buscar_recetas(db: Session, nombre: str = None, ingredientes: str = None, tiempo_max: int = None, skip: int = 0, limit: int = 10):
+    query = db.query(Receta)
+
+    # Filtrar por nombre si se proporciona
+    if nombre:
+        query = query.filter(Receta.nombre.ilike(f"%{nombre}%"))  # Búsqueda flexible (case-insensitive)
+
+    # Filtrar por ingredientes si se proporcionan
+    if ingredientes:
+        query = query.filter(Receta.ingredientes.ilike(f"%{ingredientes}%"))
+
+    # Filtrar por tiempo de preparación máximo
+    if tiempo_max:
+        query = query.filter(Receta.tiempo_minutos <= tiempo_max)
+
+    # Aplicar paginación
+    recetas = query.offset(skip).limit(limit).all()
+
+    return recetas

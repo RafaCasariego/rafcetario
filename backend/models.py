@@ -2,9 +2,11 @@
 Definición de los modelos de la base de datos (tablas y relaciones con SQLAlchemy)
 """
 
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean, TIMESTAMP, func
 from sqlalchemy.orm import relationship
 from database import Base
+
+
 
 # Modelo Usuario
 class Usuario(Base):
@@ -15,8 +17,11 @@ class Usuario(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)  # Almacenar contraseñas encriptadas
 
-    # Relación con Recetas
+    # Relaciones
     recetas = relationship("Receta", back_populates="usuario")
+    favoritos_likes = relationship("FavoritoLike", back_populates="usuario", cascade="all, delete-orphan")
+
+
 
 # Modelo Receta
 class Receta(Base):
@@ -30,4 +35,23 @@ class Receta(Base):
     tiempo_minutos = Column(Integer)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
 
+    # Relaciones
     usuario = relationship("Usuario", back_populates="recetas")
+    favoritos_likes = relationship("FavoritoLike", back_populates="receta", cascade="all, delete-orphan")
+
+
+
+# Modelo para dar favorito y/o like.
+class FavoritoLike(Base):
+    __tablename__ = "favoritos_likes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False)
+    receta_id = Column(Integer, ForeignKey("recetas.id", ondelete="CASCADE"), nullable=False)
+    favorito = Column(Boolean, default=False)
+    like = Column(Boolean, default=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+    # Relaciones
+    usuario = relationship("Usuario", back_populates="favoritos_likes")
+    receta = relationship("Receta", back_populates="favoritos_likes")
