@@ -7,6 +7,7 @@ function Recetas() {
   useEffect(() => {
     const fetchRecetas = async () => {
       const data = await obtenerRecetas();
+      console.log("📡 Datos obtenidos en React:", data);
       setRecetas(data);
     };
 

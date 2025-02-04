@@ -26,13 +26,38 @@ export const obtenerMisRecetas = async (usuario_id) => {
 }
 
 
-// Crear una nueva receta N
-export const crearReceta = async (datos, token) => {
-  const response = await api.post("/recetas", datos, {
-    headers: { Authorization: `Bearer ${token}`, },
+// Eliminar receta por ID
+export const eliminarReceta = async (recetaId) => {
+  const response = await api.delete(`/recetas/${recetaId}`);
+  return response.data;
+};
+
+
+// Obtener los detalles de una receta por ID
+export const obtenerRecetaPorId = async (receta_id) => {
+  const response = await api.get(`/recetas/${receta_id}`);
+  return response.data;
+};
+
+
+// Actualizar una receta
+export const actualizarReceta = async (receta_id, datos) => {
+  const token = localStorage.getItem("token");
+  const response = await api.put(`/recetas/${receta_id}`, datos, {
+    headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data
-}
+  return response.data;
+};
+
+
+// Crear una nueva receta
+export const crearReceta = async (datos) => {
+  const token = localStorage.getItem("token");
+  const response = await api.post("/recetas", datos, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
 
 
 //---------> FUNCIONES DE LOS USUARIOS <----------

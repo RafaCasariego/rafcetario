@@ -1,86 +1,76 @@
 import { useState, useEffect } from "react";
-import { obtenerMisRecetas, crearReceta } from "../services/api";
+import { obtenerMisRecetas, eliminarReceta } from "../services/api";
+import { Link } from "react-router-dom";
 
 const MisRecetas = () => {
   const [recetas, setRecetas] = useState([]);
-  const [nuevaReceta, setNuevaReceta] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [mensaje, setMensaje] = useState("");
+
+  // Obtener usuario_id desde localStorage
+  const usuario_id = localStorage.getItem("usuario_id");
 
   useEffect(() => {
-    const usuario_id = localStorage.getItem("usuario_id");
-
     if (usuario_id) {
       obtenerMisRecetas(usuario_id)
-        .then((data) => {
-          setRecetas(data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Error obteniendo recetas:", err);
-          setError("No se pudieron cargar las recetas.");
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
-      setError("No se encontró el usuario.");
+        .then((data) => setRecetas(data))
+        .catch(() => setMensaje("No se pudieron cargar las recetas."));
     }
-  }, []);
+  }, [usuario_id]);
 
-  const handleCreate = (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      setError("No estás autenticado.");
-      return;
+  // Eliminar receta
+  const handleEliminar = async (recetaId) => {
+    try {
+      await eliminarReceta(recetaId);
+      setRecetas(recetas.filter((receta) => receta.id !== recetaId));
+      setMensaje("Receta eliminada correctamente.");
+    } catch (error) {
+      setMensaje("Error al eliminar la receta.");
     }
-
-    crearReceta({ nombre: nuevaReceta }, token)
-      .then((recetaCreada) => {
-        setRecetas([...recetas, recetaCreada]);
-        setNuevaReceta("");
-      })
-      .catch((err) => {
-        console.error("Error creando receta:", err);
-        setError("No se pudo crear la receta.");
-      });
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Mis Recetas</h1>
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Mis Recetas</h1>
+        <Link
+          to="/receta/crear-receta"
+          className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition"
+        >
+          + Nueva Receta
+        </Link>
+      </div>
 
-      {/* Formulario para crear receta */}
-      <form onSubmit={handleCreate} className="mb-4 flex gap-2">
-        <input
-          type="text"
-          placeholder="Nombre de la receta"
-          value={nuevaReceta}
-          onChange={(e) => setNuevaReceta(e.target.value)}
-          className="p-2 border rounded-lg"
-        />
-        <button type="submit" className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">
-          Crear receta
-        </button>
-      </form>
+      {/* Mensajes */}
+      {mensaje && <p className="text-red-500 text-center">{mensaje}</p>}
 
-      {/* Mostrar estado de carga */}
-      {loading && <p className="text-gray-600">Cargando recetas...</p>}
-
-      {/* Mostrar error si ocurre */}
-      {error && <p className="text-red-500">{error}</p>}
-
-      {/* Mostrar recetas */}
-      <div>
+      {/* Lista de recetas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {recetas.length > 0 ? (
           recetas.map((receta) => (
-            <div key={receta.id} className="border p-4 rounded-lg shadow-md bg-white mb-2">
-              <h3 className="text-lg font-semibold">{receta.nombre}</h3>
+            <div
+              key={receta.id}
+              className="bg-white shadow-md rounded-lg p-4 border border-gray-200"
+            >
+              <h3 className="text-xl font-semibold text-gray-700">{receta.nombre}</h3>
+              <div className="flex justify-between mt-3">
+                <Link to={`/receta/${receta.id}`} className="text-blue-500 hover:underline">
+                  Ver
+                </Link>
+                <Link to={`/receta/editar/${receta.id}`} className="text-blue-500 hover:underline">
+                  Editar
+                </Link>
+
+                <button
+                  onClick={() => handleEliminar(receta.id)}
+                  className="text-red-500 hover:underline"
+                >
+                  Eliminar
+                </button>
+              </div>
             </div>
           ))
         ) : (
-          !loading && <p className="text-gray-500">No tienes recetas creadas.</p>
+          <p className="text-gray-500 text-center">No tienes recetas creadas.</p>
         )}
       </div>
     </div>
