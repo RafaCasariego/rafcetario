@@ -94,3 +94,16 @@ def buscar_recetas(db: Session, nombre: str = None, ingredientes: str = None, ti
     recetas = query.offset(skip).limit(limit).all()
 
     return recetas
+
+
+
+# Obtener todas las recetas de un usuario específico
+def get_recetas_por_usuario(db: Session, usuario_id: int):
+    # Asegúrate de que este filtro está funcionando bien
+    recetas = db.query(Receta).filter(Receta.usuario_id == usuario_id).all()
+    
+    # Si no se encuentran recetas para ese usuario, se debe devolver un 404
+    if not recetas:
+        raise HTTPException(status_code=404, detail="Recetas no encontradas para este usuario.")
+    
+    return recetas

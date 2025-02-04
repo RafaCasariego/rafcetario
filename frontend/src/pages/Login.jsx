@@ -17,6 +17,8 @@ const Login = () => {
   
     const response = await iniciarSesion(credenciales);
     localStorage.setItem("token", response.access_token);
+    localStorage.setItem("usuario_id", response.usuario_id);
+    
   
     navigate("/"); // Redirige a la página de inicio después del login
     window.location.reload(); // Recarga solo para actualizar el estado en el Navbar

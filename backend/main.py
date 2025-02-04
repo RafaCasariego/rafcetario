@@ -23,6 +23,7 @@ Base.metadata.create_all(bind=engine)
 
 # Instancia de FastAPI
 app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Permitir cualquier origen (puedes cambiarlo a ["http://localhost:5173"])
@@ -107,6 +108,14 @@ async def eliminar_receta(
 
 
 
+# Endpoint para obtener las recetas de un usuario específico
+@app.get("/recetas/usuarios/{usuario_id}")
+async def obtener_recetas_usuario(usuario_id: int, db: Session = Depends(get_db)):
+    return crud.receta.get_recetas_por_usuario(db, usuario_id)
+
+
+
+
 
 """********************** ENDPOINTS DE LOS USUARIOS **********************"""
 
@@ -127,13 +136,18 @@ async def registrar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db
 # Iniciar sesión. Devuelve un token JWT si las credenciales son correctas.
 @app.post("/login")
 async def login(datos_login: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    usuario = crud.usuario.obtener_usuario_por_email(db, datos_login.username)  # Ojo, aquí usamos `username`, no `email`
+    usuario = crud.usuario.obtener_usuario_por_email(db, datos_login.username)
     
     if not usuario or not verify_password(datos_login.password, usuario.password):
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
 
     token = crear_token({"sub": usuario.email})
-    return {"access_token": token, "token_type": "bearer"}
+    
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "usuario_id": usuario.id 
+    }
 
 
 
