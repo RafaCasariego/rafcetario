@@ -53,9 +53,25 @@ export const actualizarReceta = async (receta_id, datos) => {
 // Crear una nueva receta
 export const crearReceta = async (datos) => {
   const token = localStorage.getItem("token");
-  const response = await api.post("/recetas", datos, {
-    headers: { Authorization: `Bearer ${token}` },
+
+  const formData = new FormData();
+  formData.append("nombre", datos.nombre);
+  formData.append("descripcion", datos.descripcion);
+  formData.append("ingredientes", datos.ingredientes);
+  formData.append("instrucciones", datos.instrucciones);
+  formData.append("tiempo_minutos", datos.tiempo_minutos); 
+
+  if (datos.imagen) {
+    formData.append("imagen", datos.imagen);
+  }
+
+  const response = await api.post("/recetas", formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
   });
+
   return response.data;
 };
 

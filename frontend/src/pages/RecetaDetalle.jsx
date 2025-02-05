@@ -23,14 +23,21 @@ const RecetaDetalle = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+      {/* Imagen de la receta */}
+      <img
+        src={receta.imagen || "/images/default-recipe.jpg"} 
+        alt={receta.nombre}
+        className="w-full h-64 object-cover rounded-lg mb-4"
+      />
+
       <h1 className="text-3xl font-bold text-gray-800 mb-4">{receta.nombre}</h1>
       <p className="text-gray-700 mb-4">{receta.descripcion}</p>
 
       <h2 className="text-xl font-semibold mt-6">Ingredientes:</h2>
-      <p className="text-gray-600">{receta.ingredientes}</p>
+      <p className="text-gray-600 whitespace-pre-line">{receta.ingredientes}</p>
 
       <h2 className="text-xl font-semibold mt-6">Instrucciones:</h2>
-      <p className="text-gray-600">{receta.instrucciones}</p>
+      <p className="text-gray-600 whitespace-pre-line">{receta.instrucciones}</p>
 
       <Link
         to="/"

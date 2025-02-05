@@ -34,11 +34,10 @@ class Receta(Base):
     instrucciones = Column(Text)
     tiempo_minutos = Column(Integer)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    imagen_url = Column(String, nullable=True)  # Nueva columna para la URL de la imagen
 
-    # Relaciones
     usuario = relationship("Usuario", back_populates="recetas")
     favoritos_likes = relationship("FavoritoLike", back_populates="receta", cascade="all, delete-orphan")
-
 
 
 # Modelo para dar favorito y/o like.

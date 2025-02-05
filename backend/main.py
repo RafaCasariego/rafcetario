@@ -2,7 +2,7 @@
 Punto de entrada de la API, donde se definen las rutas y se inicia la app
 """
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from database import engine, get_db, Base
@@ -14,6 +14,11 @@ from auth.jwt import obtener_usuario_actual, crear_token
 from auth.security import verify_password
 import crud.favorito_like
 from fastapi.middleware.cors import CORSMiddleware
+import shutil
+import os
+import boto3
+from dotenv import load_dotenv
+from typing import Optional
 
 
 
@@ -32,8 +37,30 @@ app.add_middleware(
     allow_headers=["*"],  # Permitir todos los headers
 )
 
+# 🔥 Ruta absoluta para evitar problemas de ejecución
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_DIR = os.path.join(BASE_DIR, "../frontend/public/images/recetas")
+
+# ✅ Asegurar que la carpeta de imágenes existe
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
+# Cargar variables de entorno desde .env
+load_dotenv()
+
+# Credenciales de AWS
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME")
+AWS_REGION = os.getenv("AWS_REGION")
+
+# Cliente de S3
+s3_client = boto3.client(
+    "s3",
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    region_name=AWS_REGION,
+)
 
 
 """********************** ENDPOINTS DE LAS RECETAS **********************"""
@@ -64,14 +91,52 @@ async def mostrar_recetas(db: Session = Depends(get_db)):
 
 
 
-# Endpoint para crear una nueva receta (requiere autenticación)
+# Endpoint para crear una receta
 @app.post("/recetas", status_code=status.HTTP_201_CREATED)
 async def crear_receta(
-    receta: RecetaCreate,
+    nombre: str = Form(...),
+    descripcion: str = Form(...),
+    ingredientes: str = Form(...),
+    instrucciones: str = Form(...),
+    tiempo_minutos: int = Form(...),
+    imagen: Optional[UploadFile] = File(None),  # Imagen opcional
     usuario_actual: dict = Depends(obtener_usuario_actual),
     db: Session = Depends(get_db),
 ):
-    return crud.receta.create_receta(db, receta, usuario_actual)
+    imagen_url = "https://rafcetario-images.s3.eu-north-1.amazonaws.com/default-image.jpg"  # Imagen por defecto
+
+    if imagen:
+        try:
+            # Nombre único para la imagen en S3
+            nombre_archivo = f"recetas/{usuario_actual.id}_{imagen.filename}"
+
+            # Subir la imagen a S3
+            s3_client.upload_fileobj(imagen.file, AWS_BUCKET_NAME, nombre_archivo)
+
+            # URL pública de la imagen
+            imagen_url = f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{nombre_archivo}"
+            print(f"✅ Imagen subida correctamente: {imagen_url}")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error subiendo imagen: {str(e)}")
+
+    # Crear la receta en la base de datos con la URL correcta
+    nueva_receta = crud.receta.create_receta(
+        db,
+        RecetaCreate(
+            nombre=nombre,
+            descripcion=descripcion,
+            ingredientes=ingredientes,
+            instrucciones=instrucciones,
+            tiempo_minutos=tiempo_minutos,
+        ),
+        usuario_actual,
+        imagen_url=imagen_url  # 🔥 PASA la URL correcta aquí
+)
+
+    return nueva_receta
+
+
+
 
 
 

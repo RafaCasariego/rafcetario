@@ -11,17 +11,26 @@ const CrearReceta = () => {
     instrucciones: "",
     tiempo_minutos: "",
   });
+  const [imagen, setImagen] = useState(null);
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setReceta({ ...receta, [e.target.name]: e.target.value });
+    setReceta({
+      ...receta,
+      [e.target.name]: e.target.type === "number" ? Number(e.target.value) : e.target.value,
+    });
+  };
+
+  const handleFileChange = (e) => {
+    setImagen(e.target.files[0]); // Guardar la imagen seleccionada
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      await crearReceta(receta);
-      navigate("/mis-recetas"); // Redirige a Mis Recetas después de crearla
+      await crearReceta({ ...receta, tiempo_minutos: Number(receta.tiempo_minutos), imagen }); // 🔥 Asegurar que el número se envía correctamente
+      navigate("/mis-recetas"); // Redirige después de crear la receta
     } catch {
       setError("Error al crear la receta.");
     }
@@ -74,6 +83,12 @@ const CrearReceta = () => {
           className="p-2 border rounded-lg"
           required
         />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="p-2 border rounded-lg"
+        />
         <button type="submit" className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600">
           Crear Receta
         </button>
@@ -83,3 +98,4 @@ const CrearReceta = () => {
 };
 
 export default CrearReceta;
+

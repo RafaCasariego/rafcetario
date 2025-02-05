@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from models import Receta
 from schemas import RecetaCreate, RecetaUpdate
 from fastapi import HTTPException, status
+from typing import Optional
 
 
 # Obtener todas las recetas (cualquiera puede hacerlo)
@@ -14,20 +15,23 @@ def get_recetas(db: Session):
 
 
 # Crear una nueva receta (solo un usuario autenticado puede hacerlo)
-def create_receta(db: Session, receta: RecetaCreate, usuario_actual):
+def create_receta(db: Session, receta: RecetaCreate, usuario_actual, imagen_url: Optional[str] = None):
+
     nueva_receta = Receta(
         nombre=receta.nombre,
         descripcion=receta.descripcion,
         ingredientes=receta.ingredientes,
         instrucciones=receta.instrucciones,
         tiempo_minutos=receta.tiempo_minutos,
-        usuario_id=usuario_actual.id, # Asociamos la receta al usuario autenticado
+        usuario_id=usuario_actual.id,
+        imagen_url=imagen_url if imagen_url else "https://rafcetario-images.s3.eu-north-1.amazonaws.com/default-image.jpg",  
     )
+
+
     db.add(nueva_receta)
     db.commit()
     db.refresh(nueva_receta)
     return nueva_receta
-
 
 
 # Obtener una receta por ID (cualquiera puede hacerlo)

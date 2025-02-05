@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { obtenerRecetas } from "../services/api";
 
 const Inicio = () => {
-  const [recetas, setRecetas] = useState([]); // 🔹 Inicializamos con un array vacío
+  const [recetas, setRecetas] = useState([]); // 🔹 Recetas destacadas
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -12,14 +12,14 @@ const Inicio = () => {
     const fetchRecetas = async () => {
       try {
         const data = await obtenerRecetas();
-        if (data && data.recetas) {
-          setRecetas(data.recetas);
+        if (data && data.length > 0) {
+          setRecetas(data.slice(0, 9)); // 🔹 Tomamos solo las 9 primeras recetas destacadas
         } else {
-          setRecetas([]); // 🔹 Evita que sea undefined
-          setError("No se pudieron cargar las recetas.");
+          setRecetas([]);
+          setError("No hay recetas destacadas en este momento.");
         }
       } catch (err) {
-        setRecetas([]); // 🔹 Evita errores al acceder a `recetas.length`
+        setRecetas([]);
         setError("Error cargando recetas.");
       }
     };
@@ -53,13 +53,13 @@ const Inicio = () => {
 
       {/* Recetas Destacadas */}
       <div className="py-12 px-6">
-        <h2 className="text-3xl font-bold mb-6">Recetas Destacadas</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center">Recetas Destacadas</h2>
 
-        {error && <p className="text-red-500">{error}</p>}
+        {error && <p className="text-red-500 text-center">{error}</p>}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {recetas.length > 0 ? (
-            recetas.slice(0, 6).map((receta) => (
+            recetas.map((receta) => (
               <div key={receta.id} className="bg-white shadow-lg rounded-lg p-4 hover:shadow-xl transition">
                 <img
                   src={receta.imagen || "/images/default-recipe.jpg"}
@@ -73,12 +73,12 @@ const Inicio = () => {
                   <Link to={`/receta/${receta.id}`} className="text-blue-500 hover:underline">
                     Ver receta
                   </Link>
-                  <span>❤️ {receta.likes}</span>
+                  <span>❤️ {receta.likes || 0}</span>
                 </div>
               </div>
             ))
           ) : (
-            <p>No hay recetas destacadas.</p>
+            <p className="text-center text-gray-600">No hay recetas destacadas disponibles.</p>
           )}
         </div>
       </div>
@@ -87,7 +87,8 @@ const Inicio = () => {
       <div className="py-12 bg-gray-100 px-6 text-center">
         {token ? (
           <div>
-            <h2 className="text-2xl font-bold mb-4">¡Crea tus propias recetas!</h2>
+            <h2 className="text-2xl font-bold mb-4">Aporta una nueva receta a la comunidad!</h2>
+            <p className="text-gray-600 mb-4">Estamos deseando conocer tus dotes culinarias :)</p>
             <button
               className="bg-green-500 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-green-600"
               onClick={() => navigate("/receta/crear-receta")}
@@ -97,7 +98,10 @@ const Inicio = () => {
           </div>
         ) : (
           <div>
-            <h2 className="text-2xl font-bold mb-4">Regístrate para compartir tus recetas</h2>
+            <h2 className="text-2xl font-bold mb-4">Regístrate para crear tus recetas!</h2>
+            <p className="text-gray-600 mb-4">
+              Así podrás guardar tus recetas en favoritos, crear otras nuevas o editar las antiguas!
+            </p>
             <Link to="/registro">
               <button className="bg-blue-500 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-blue-600">
                 Registrarme
@@ -116,3 +120,4 @@ const Inicio = () => {
 };
 
 export default Inicio;
+

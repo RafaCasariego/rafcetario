@@ -3,6 +3,7 @@ Esquemas de Pydantic para validación de datos en las solicitudes y respuestas
 """
 
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 # Esquema para crear una receta
 class RecetaCreate(BaseModel):
@@ -11,6 +12,7 @@ class RecetaCreate(BaseModel):
     ingredientes: str
     instrucciones: str
     tiempo_minutos: int
+    imagen_url: Optional[str] = None  # Agregar este campo opcional
 
 # Esquema para actualizar una receta
 class RecetaUpdate(BaseModel):
@@ -19,6 +21,10 @@ class RecetaUpdate(BaseModel):
     ingredientes: str
     instrucciones: str
     tiempo_minutos: int
+    imagen_url: Optional[str] = None  # Nueva propiedad opcional para la URL de la imagen
+
+    class Config:
+        orm_mode = True
 
 
 # Esquema para crear un usuario
