@@ -90,6 +90,14 @@ export const iniciarSesion = async (credenciales) => {
   const response = await api.post("/login", new URLSearchParams(credenciales), {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
   });
+
+  // 🔥 Guarda el token en localStorage
+  localStorage.setItem("token", response.data.access_token);
+
+  // 🔥 Obtiene el perfil del usuario autenticado
+  const perfil = await obtenerPerfil(response.data.access_token);
+  localStorage.setItem("usuario", JSON.stringify(perfil)); // Guarda usuario
+
   return response.data;
 };
 

@@ -35,9 +35,8 @@ function App() {
           <Route path="/receta/crear-receta" element={<CrearReceta />} />
 
         </Route>
-
       </Routes>
-
+      <Footer />
     </Router>
   );
 }

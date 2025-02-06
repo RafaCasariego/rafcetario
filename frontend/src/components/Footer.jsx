@@ -1,7 +1,7 @@
 const Footer = () => {
     return (
       <footer className="footer">
-        <p>© 2025 Rafcetario - Todas las recetas en un solo lugar 🍲</p>
+        <p>2025 Rafcetario - Hecho con cariño por Rafa Casariego :)</p>
       </footer>
     );
   };
