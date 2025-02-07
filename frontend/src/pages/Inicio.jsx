@@ -154,7 +154,7 @@ const Inicio = () => {
       {/* Sección de Recetas */}
       <div className="py-12 px-6 max-w-7xl mx-auto" ref={gridRef}>
         {/* Título original */}
-        <h2 className="text-3xl font-bold mb-6 text-center">Explora Nuestras Recetas :)</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">¡Descubre recetas que inspiran!</h2>
 
         {/* Buscador interno (más ancho) */}
         <div className="flex justify-center mb-6">
@@ -175,7 +175,7 @@ const Inicio = () => {
             recetasPaginadas.map((receta) => (
               <div
                 key={receta.id}
-                className="bg-gray-300 drop-shadow-md rounded-lg overflow-hidden transform transition hover:scale-105 cursor-pointer"
+                className="bg-neutral-200 border-gray-500 drop-shadow-md rounded-lg overflow-hidden transform transition hover:scale-105 cursor-pointer"
                 onClick={() => setModalReceta(receta)}
               >
                 <img
@@ -216,11 +216,11 @@ const Inicio = () => {
 
         {/* Paginación con listado de páginas */}
         {totalPaginas > 1 && (
-          <div className="flex justify-center mt-6">
+          <div className="flex justify-center mt-6 mb-20 py-10">
             <button
               onClick={() => setPaginaActual((prev) => Math.max(prev - 1, 1))}
               disabled={paginaActual === 1}
-              className="px-3 py-1 mx-1 bg-gray-300 rounded hover:bg-gray-400"
+              className="px-3 py-1 mx-1 bg-transparent rounded-full cursor-pointer hover:bg-blue-500 hover:text-white"
             >
               {"<"}
             </button>
@@ -235,8 +235,8 @@ const Inicio = () => {
                   onClick={() => setPaginaActual(item)}
                   className={`px-3 py-1 mx-1 rounded ${
                     item === paginaActual
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-300 text-black hover:bg-gray-400"
+                      ? "bg-blue-500 text-white rounded-full"
+                      : "bg-transparent text-black rounded-full hover:bg-blue-500 hover:text-white"
                   }`}
                 >
                   {item}
@@ -248,7 +248,7 @@ const Inicio = () => {
                 setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))
               }
               disabled={paginaActual === totalPaginas}
-              className="px-3 py-1 mx-1 bg-gray-300 rounded hover:bg-gray-400"
+              className="px-3 py-1 mx-1 bg-transparent rounded-full hover:bg-blue-500 hover:text-white"
             >
               {">"}
             </button>
@@ -256,55 +256,126 @@ const Inicio = () => {
         )}
       </div>
 
-      {/* Modal de Receta */}
-      {modalReceta && (
-        <div
-          id="modalFondo"
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-          onClick={handleCerrarModal}
+
+{/* Modal de Receta */}
+{modalReceta && (
+  <div
+    id="modalFondo"
+    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+    onClick={handleCerrarModal}
+  >
+    <div className="bg-white p-8 rounded-lg max-w-xl w-full relative shadow-xl">
+      {/* Botón de cerrar */}
+      <button
+        className="absolute top-4 right-4 text-black text-xs font-extrabold hover:text-red-500"
+        onClick={() => setModalReceta(null)}
+      >
+        &#10005;
+      </button>
+      {/* Imagen de la receta */}
+      <img
+        src={
+          modalReceta.imagen_url ||
+          "https://rafcetario-images.s3.eu-north-1.amazonaws.com/default-image.jpg"
+        }
+        alt={modalReceta.nombre}
+        className="w-full h-48 object-cover rounded-lg mb-6"
+      />
+      {/* Título de la receta */}
+      <h3 className="text-3xl font-bold mb-4">{modalReceta.nombre}</h3>
+      
+      {/* Sección de Ingredientes */}
+      <div className="mb-6">
+        <h4 className="text-xl font-semibold border-b pb-2 mb-2">🥕 Ingredientes</h4>
+        <p className="text-gray-700">{modalReceta.ingredientes}</p>
+      </div>
+      
+      {/* Sección de Preparación */}
+      <div className="mb-6">
+        <h4 className="text-xl font-semibold border-b pb-2 mb-2">📜 Preparación</h4>
+        <p className="text-gray-700">{modalReceta.instrucciones}</p>
+      </div>
+      
+      {/* Sección de Tiempo */}
+      <div className="mb-6">
+        <h4 className="text-xl font-semibold border-b pb-2 mb-2">⏳ Tiempo</h4>
+        <p className="text-gray-700">{modalReceta.tiempo_minutos} min</p>
+      </div>
+      
+      {/* Botones de Acciones */}
+      <div className="flex justify-end gap-6">
+        {/* Botón para ver la receta */}
+        <button
+          className="flex items-center bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition"
+          onClick={() => {
+            navigate(`/receta/${modalReceta.id}`);
+            setModalReceta(null);
+          }}
         >
-          <div className="bg-white p-6 rounded-lg max-w-md w-full relative shadow-lg">
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-              onClick={() => setModalReceta(null)}
-            >
-              ✖
-            </button>
-            <img
-              src={
-                modalReceta.imagen_url ||
-                "https://rafcetario-images.s3.eu-north-1.amazonaws.com/default-image.jpg"
-              }
-              alt={modalReceta.nombre}
-              className="w-full h-40 object-cover rounded-lg mb-4"
-            />
-            <h3 className="text-2xl font-bold">{modalReceta.nombre}</h3>
-            <p className="text-gray-600 mt-2">{modalReceta.descripcion}</p>
-            <p className="text-gray-500 mt-2">
-              🥕 Ingredientes: {modalReceta.ingredientes}
-            </p>
-            <p className="text-gray-500 mt-2">
-              📜 Instrucciones: {modalReceta.instrucciones}
-            </p>
-            <p className="text-gray-500 mt-2">
-              ⏳ {modalReceta.tiempo_minutos} min
-            </p>
-          </div>
-        </div>
-      )}
+          Ver receta
+        </button>
+        <button
+          className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+          onClick={() => {
+            // Aquí va la lógica para dar like
+            console.log("Like pressed");
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2 fill-current"
+            viewBox="0 0 20 20"
+          >
+            <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 18.656l-6.828-6.829a4 4 0 010-5.656z" />
+          </svg>
+          Like
+        </button>
+        <button
+          className="flex items-center bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+          onClick={() => {
+            if (!usuarioAutenticado) {
+              navigate("/registro");
+            } else {
+              // Llamada a la API para añadir a favoritos (lógica a implementar)
+              console.log("Añadiendo a favoritos...");
+            }
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2 fill-current"
+            viewBox="0 0 20 20"
+          >
+            <path d="M5 3a2 2 0 00-2 2v12l7-3 7 3V5a2 2 0 00-2-2H5z" />
+          </svg>
+          Favorito
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
 
       {/* CTA Dinámico */}
-      <div className="py-20 bg-gray-300 px-6 text-center">
+      <div className="py-20 bg-gradient-to-t from-blue-600 to-white px-6 text-center">
         {usuarioAutenticado ? (
           <>
-            <h2 className="text-2xl font-bold mb-4 py-3">
-              Añade una de tus recetas a nuestra comunidad!
+            <h2
+              className="text-3xl font-bold mb-4 text-gray-100"
+              style={{ textShadow: "0 1px 3px rgba(0, 0, 0, 2)" }}
+            >
+              ¡Comparte tu pasión culinaria!
             </h2>
-            <p className="text-lg text-gray-800 font-semibold mb-4 py-3">
-              Si añades tus recetas, todo el mundo podrá verlas y compartirlas.
+            <p
+              className="text-lg mb-6 text-white"
+              style={{ textShadow: "0 1px 3px rgba(0, 0, 0, 2)" }}
+            >
+              Publica tus recetas y sé la inspiración de nuestra comunidad.
             </p>
+
             <button
-              className="bg-blue-500 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-green-600"
+              className="bg-white text-blue-500 px-8 py-3 rounded-full text-lg font-bold hover:scale-125 shadow-lg transition"
               onClick={() => navigate("/receta/crear-receta")}
             >
               Crear Receta
@@ -312,14 +383,17 @@ const Inicio = () => {
           </>
         ) : (
           <>
-            <h2 className="text-2xl font-bold mb-4">
-              Regístrate para añadir recetas a favoritos, crear tus propias recetas y más!
+            <h2 className="text-3xl font-bold mb-4 text-white">
+              ¿Listo para transformar tu cocina?
             </h2>
+            <p className="text-lg mb-6 text-white">
+              Regístrate para descubrir recetas exclusivas, guardar tus favoritas y más.
+            </p>
             <button
-              className="bg-blue-500 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-blue-600"
+              className="bg-white text-blue-500 px-8 py-3 rounded-full text-lg font-bold hover:bg-gray-100 shadow-lg transition"
               onClick={() => navigate("/registro")}
             >
-              Registrarme
+              Regístrate Ahora
             </button>
           </>
         )}

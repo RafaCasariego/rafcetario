@@ -1,10 +1,11 @@
 const Footer = () => {
-    return (
-      <footer className="footer">
-        <p>2025 Rafcetario - Hecho con cariño por Rafa Casariego :)</p>
-      </footer>
-    );
-  };
-  
-  export default Footer;
-  
+  return (
+    <footer className="py-6 bg-blue-600 text-center">
+      <p className="text-gray-100 text-extrabold">
+        © 2025 Rafcetario - Hecho con cariño por Rafa Casariego :)
+      </p>
+    </footer>
+  );
+};
+
+export default Footer;
