@@ -12,6 +12,12 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# Validar que DATABASE_URL esté definida antes de usarla
+if DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("mysql://", "mysql+mysqlconnector://")
+else:
+    raise ValueError("ERROR: La variable de entorno DATABASE_URL no está configurada correctamente.")
+
 # Crear el motor de la base de datos
 engine = create_engine(DATABASE_URL)
 

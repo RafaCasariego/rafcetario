@@ -1,12 +1,13 @@
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000"; // Cambia esto si tu backend está en otro puerto
+const API_URL = "https://rafcetario-ep7z0592q-rafacasariegos-projects.vercel.app";
 
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: false
 });
 
 

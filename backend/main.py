@@ -39,10 +39,6 @@ app.add_middleware(
 
 # 🔥 Ruta absoluta para evitar problemas de ejecución
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_DIR = os.path.join(BASE_DIR, "../frontend/public/images/recetas")
-
-# ✅ Asegurar que la carpeta de imágenes existe
-os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 # Cargar variables de entorno desde .env
