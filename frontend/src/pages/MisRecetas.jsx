@@ -19,6 +19,9 @@ const MisRecetas = () => {
 
   // Eliminar receta
   const handleEliminar = async (recetaId) => {
+    if (!window.confirm("¿Estás seguro de eliminar esta receta? Esta acción es irreversible.")) {
+      return; // Si el usuario cancela, no hace nada
+    }
     try {
       await eliminarReceta(recetaId);
       setRecetas(recetas.filter((receta) => receta.id !== recetaId));

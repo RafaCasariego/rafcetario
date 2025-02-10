@@ -58,7 +58,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 w-full p-4 transition-all duration-300 z-50 ${scrolling ? "bg-blue-600 shadow-md" : "bg-transparent"}`}>
+    <nav className={`fixed top-0 left-0 w-full p-4 transition-all duration-300 z-50 ${scrolling ? "bg-blue-700 shadow-md" : "bg-transparent"}`}>
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         <Link to="/" className="text-xl font-bold text-white">
           Rafcetario

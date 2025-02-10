@@ -28,9 +28,13 @@ export const obtenerMisRecetas = async (usuario_id) => {
 
 // Eliminar receta por ID
 export const eliminarReceta = async (recetaId) => {
-  const response = await api.delete(`/recetas/${recetaId}`);
+  const token = localStorage.getItem("token");
+  const response = await api.delete(`/recetas/${recetaId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return response.data;
 };
+
 
 
 // Obtener los detalles de una receta por ID
@@ -129,4 +133,35 @@ export const actualizarUsuario = async (token, datos) => {
 }
 
 
+// Agregar la receta en favoritos
+export const toggle_favorito = async (receta_id) => {
+  const token = localStorage.getItem("token");
+  const response = await api.put(
+    `/recetas/${receta_id}/favorito`,
+    null, // No se envía body
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return response.data;
+};
 
+
+// Dar like a una receta
+export const toggle_like = async (receta_id) => {
+  const token = localStorage.getItem("token");
+  const response = await api.put(
+    `/recetas/${receta_id}/like`,
+    null, // No se envía body
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return response.data;
+};
+
+
+// Función para obtener el número de likes de una receta
+export const obtenerLikes = async (receta_id) => {
+  const token = localStorage.getItem("token");
+  const response = await api.get(`/recetas/${receta_id}/likes`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data; // suponemos que la respuesta es { count: number }
+};

@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { obtenerRecetas } from "../services/api";
+import { 
+  obtenerRecetas, 
+  toggle_like, 
+  toggle_favorito, 
+  obtenerFavoritos,
+  obtenerLikes  // Asegúrate de tener esta función en tu API
+} from "../services/api";
+import confetti from "canvas-confetti"; // Importamos la librería de confeti
 
 // Función para normalizar texto (elimina tildes y caracteres especiales)
 const normalizarTexto = (texto) =>
@@ -16,6 +23,13 @@ const Inicio = () => {
   const gridRef = useRef(null);
   const navigate = useNavigate();
   const [usuarioAutenticado, setUsuarioAutenticado] = useState(false);
+  
+  // Estado para almacenar, por receta, el valor de like y favorito.
+  // La estructura es: { [recetaId]: { liked: boolean, favorited: boolean } }
+  const [recetaStatus, setRecetaStatus] = useState({});
+  // Estado para almacenar el número de likes por receta
+  // La estructura es: { [recetaId]: number }
+  const [likesCount, setLikesCount] = useState({});
 
   // Verificar autenticación
   useEffect(() => {
@@ -47,6 +61,59 @@ const Inicio = () => {
     };
     fetchRecetas();
   }, []);
+
+  // Si el usuario está autenticado, obtenemos el estado de like y favoritos para cada receta
+  useEffect(() => {
+    const fetchFavoritoLikeStatus = async () => {
+      if (usuarioAutenticado) {
+        const usuarioData = localStorage.getItem("usuario");
+        if (usuarioData) {
+          const usuario = JSON.parse(usuarioData);
+          try {
+            const data = await obtenerFavoritos(usuario.id);
+            // Si data no es un array, intentamos extraer la propiedad "favoritos"
+            const favoritosArray = Array.isArray(data) ? data : data.favoritos || [];
+            setRecetaStatus((prev) => {
+              const newStatus = { ...prev };
+              favoritosArray.forEach((item) => {
+                newStatus[item.receta_id] = {
+                  liked: item.like,
+                  favorited: item.favorito,
+                };
+              });
+              return newStatus;
+            });
+          } catch (error) {
+            console.error("Error al obtener estado de like/favoritos:", error);
+          }
+        }
+      }
+    };
+    fetchFavoritoLikeStatus();
+  }, [usuarioAutenticado, recetas]);
+
+  // Obtener el número de likes para cada receta (consulta a la API)
+  useEffect(() => {
+    const fetchLikesCount = async () => {
+      const counts = {};
+      await Promise.all(
+        recetas.map(async (receta) => {
+          try {
+            const data = await obtenerLikes(receta.id);
+            // Suponemos que la API devuelve un objeto { count: number }
+            counts[receta.id] = data.count || 0;
+          } catch (error) {
+            console.error("Error obteniendo likes para receta", receta.id, error);
+            counts[receta.id] = 0;
+          }
+        })
+      );
+      setLikesCount(counts);
+    };
+    if (recetas.length > 0) {
+      fetchLikesCount();
+    }
+  }, [recetas]);
 
   // Reiniciamos la página a 1 cuando cambia el filtro
   useEffect(() => {
@@ -153,10 +220,7 @@ const Inicio = () => {
 
       {/* Sección de Recetas */}
       <div className="py-12 px-6 max-w-7xl mx-auto" ref={gridRef}>
-        {/* Título original */}
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">¡Descubre recetas que inspiran!</h2>
-
-        {/* Buscador interno (más ancho) */}
         <div className="flex justify-center mb-6">
           <input
             type="text"
@@ -166,10 +230,7 @@ const Inicio = () => {
             className="w-[95%] p-2 border border-gray-300 rounded-lg"
           />
         </div>
-
         {error && <p className="text-red-500 text-center">{error}</p>}
-
-        {/* Grid de recetas con diseño minimalista */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {recetasPaginadas.length > 0 ? (
             recetasPaginadas.map((receta) => (
@@ -203,7 +264,8 @@ const Inicio = () => {
                       >
                         <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 18.656l-6.828-6.829a4 4 0 010-5.656z" />
                       </svg>
-                      {receta.likes}
+                      {/* Se muestra el número de likes obtenido de la API (o 0 si no está definido) */}
+                      {likesCount[receta.id] || 0}
                     </span>
                   </div>
                 </div>
@@ -213,8 +275,6 @@ const Inicio = () => {
             <p className="text-center text-gray-600">No hay recetas disponibles.</p>
           )}
         </div>
-
-        {/* Paginación con listado de páginas */}
         {totalPaginas > 1 && (
           <div className="flex justify-center mt-6 mb-20 py-10">
             <button
@@ -256,109 +316,179 @@ const Inicio = () => {
         )}
       </div>
 
-
-{/* Modal de Receta */}
-{modalReceta && (
-  <div
-    id="modalFondo"
-    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-    onClick={handleCerrarModal}
-  >
-    <div className="bg-white p-8 rounded-lg max-w-xl w-full relative shadow-xl">
-      {/* Botón de cerrar */}
-      <button
-        className="absolute top-4 right-4 text-black text-xs font-extrabold hover:text-red-500"
-        onClick={() => setModalReceta(null)}
-      >
-        &#10005;
-      </button>
-      {/* Imagen de la receta */}
-      <img
-        src={
-          modalReceta.imagen_url ||
-          "https://rafcetario-images.s3.eu-north-1.amazonaws.com/default-image.jpg"
-        }
-        alt={modalReceta.nombre}
-        className="w-full h-48 object-cover rounded-lg mb-6"
-      />
-      {/* Título de la receta */}
-      <h3 className="text-3xl font-bold mb-4">{modalReceta.nombre}</h3>
-      
-      {/* Sección de Ingredientes */}
-      <div className="mb-6">
-        <h4 className="text-xl font-semibold border-b pb-2 mb-2">🥕 Ingredientes</h4>
-        <p className="text-gray-700">{modalReceta.ingredientes}</p>
-      </div>
-      
-      {/* Sección de Preparación */}
-      <div className="mb-6">
-        <h4 className="text-xl font-semibold border-b pb-2 mb-2">📜 Preparación</h4>
-        <p className="text-gray-700">{modalReceta.instrucciones}</p>
-      </div>
-      
-      {/* Sección de Tiempo */}
-      <div className="mb-6">
-        <h4 className="text-xl font-semibold border-b pb-2 mb-2">⏳ Tiempo</h4>
-        <p className="text-gray-700">{modalReceta.tiempo_minutos} min</p>
-      </div>
-      
-      {/* Botones de Acciones */}
-      <div className="flex justify-end gap-6">
-        {/* Botón para ver la receta */}
-        <button
-          className="flex items-center bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition"
-          onClick={() => {
-            navigate(`/receta/${modalReceta.id}`);
-            setModalReceta(null);
-          }}
+      {/* Modal de Receta */}
+      {modalReceta && (
+        <div
+          id="modalFondo"
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          onClick={handleCerrarModal}
         >
-          Ver receta
-        </button>
-        <button
-          className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-          onClick={() => {
-            // Aquí va la lógica para dar like
-            console.log("Like pressed");
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-2 fill-current"
-            viewBox="0 0 20 20"
-          >
-            <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 18.656l-6.828-6.829a4 4 0 010-5.656z" />
-          </svg>
-          Like
-        </button>
-        <button
-          className="flex items-center bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
-          onClick={() => {
-            if (!usuarioAutenticado) {
-              navigate("/registro");
-            } else {
-              // Llamada a la API para añadir a favoritos (lógica a implementar)
-              console.log("Añadiendo a favoritos...");
-            }
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-2 fill-current"
-            viewBox="0 0 20 20"
-          >
-            <path d="M5 3a2 2 0 00-2 2v12l7-3 7 3V5a2 2 0 00-2-2H5z" />
-          </svg>
-          Favorito
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
+          <div className="bg-white p-8 rounded-lg max-w-xl w-full relative shadow-xl">
+            {/* Botón de cerrar */}
+            <button
+              className="absolute top-4 right-4 text-black text-xs font-extrabold hover:text-red-500"
+              onClick={() => setModalReceta(null)}
+            >
+              &#10005;
+            </button>
+            {/* Imagen de la receta */}
+            <img
+              src={
+                modalReceta.imagen_url ||
+                "https://rafcetario-images.s3.eu-north-1.amazonaws.com/default-image.jpg"
+              }
+              alt={modalReceta.nombre}
+              className="w-full h-48 object-cover rounded-lg mb-6"
+            />
+            {/* Título de la receta */}
+            <h3 className="text-3xl font-bold mb-4">{modalReceta.nombre}</h3>
+            
+            {/* Sección de Ingredientes */}
+            <div className="mb-6">
+              <h4 className="text-xl font-semibold border-b pb-2 mb-2">🥕 Ingredientes</h4>
+              <p className="text-gray-950">{modalReceta.ingredientes}</p>
+            </div>
+            
+            {/* Sección de Preparación */}
+            <div className="mb-6">
+              <h4 className="text-xl font-semibold border-b pb-2 mb-2">📜 Preparación</h4>
+              <p className="text-gray-950">{modalReceta.instrucciones}</p>
+            </div>
+            
+            {/* Sección de Tiempo */}
+            <div className="mb-6">
+              <h4 className="text-xl font-semibold border-b pb-2 mb-2">⏳ Tiempo</h4>
+              <p className="text-gray-950">{modalReceta.tiempo_minutos} min</p>
+            </div>
+            
+            {/* Botones de Acciones */}
+            <div className="flex justify-end gap-6">
+              {/* Botón para ver la receta */}
+              <button
+                className="flex items-center bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition"
+                onClick={() => {
+                  navigate(`/receta/${modalReceta.id}`);
+                  setModalReceta(null);
+                }}
+              >
+                Ver receta
+              </button>
+              {/* Botón de Like */}
+              <button
+                className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                onClick={async () => {
+                  if (!usuarioAutenticado) {
+                    navigate("/registro");
+                  } else {
+                    // Actualización optimista
+                    const currentLiked = recetaStatus[modalReceta.id]?.liked || false;
+                    const newLiked = !currentLiked;
+                    setRecetaStatus((prev) => ({
+                      ...prev,
+                      [modalReceta.id]: {
+                        ...prev[modalReceta.id],
+                        liked: newLiked,
+                      },
+                    }));
+                    if (newLiked) {
+                      confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                      });
+                    }
+                    try {
+                      const result = await toggle_like(modalReceta.id);
+                      setRecetaStatus((prev) => ({
+                        ...prev,
+                        [modalReceta.id]: {
+                          ...prev[modalReceta.id],
+                          liked: result.like,
+                        },
+                      }));
+                    } catch (err) {
+                      setRecetaStatus((prev) => ({
+                        ...prev,
+                        [modalReceta.id]: {
+                          ...prev[modalReceta.id],
+                          liked: currentLiked,
+                        },
+                      }));
+                      console.error("Error al actualizar like:", err);
+                    }
+                  }
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2 fill-current"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 18.656l-6.828-6.829a4 4 0 010-5.656z" />
+                </svg>
+                {recetaStatus[modalReceta.id]?.liked ? "Quitar Like" : "Like"}
+              </button>
+              {/* Botón de Favorito */}
+              <button
+                className="flex items-center bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+                onClick={async () => {
+                  if (!usuarioAutenticado) {
+                    navigate("/registro");
+                  } else {
+                    const currentFav = recetaStatus[modalReceta.id]?.favorited || false;
+                    const newFav = !currentFav;
+                    setRecetaStatus((prev) => ({
+                      ...prev,
+                      [modalReceta.id]: {
+                        ...prev[modalReceta.id],
+                        favorited: newFav,
+                      },
+                    }));
+                    if (newFav) {
+                      confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                      });
+                    }
+                    try {
+                      const result = await toggle_favorito(modalReceta.id);
+                      setRecetaStatus((prev) => ({
+                        ...prev,
+                        [modalReceta.id]: {
+                          ...prev[modalReceta.id],
+                          favorited: result.favorito,
+                        },
+                      }));
+                    } catch (err) {
+                      setRecetaStatus((prev) => ({
+                        ...prev,
+                        [modalReceta.id]: {
+                          ...prev[modalReceta.id],
+                          favorited: currentFav,
+                        },
+                      }));
+                      console.error("Error al actualizar favorito:", err);
+                    }
+                  }
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2 fill-current"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M5 3a2 2 0 00-2 2v12l7-3 7 3V5a2 2 0 00-2-2H5z" />
+                </svg>
+                {recetaStatus[modalReceta.id]?.favorited ? "Eliminar de Favoritos" : "Favorito"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CTA Dinámico */}
-      <div className="py-20 bg-gradient-to-t from-blue-600 to-white px-6 text-center">
+      <div className="py-20 bg-gradient-to-t from-blue-700 to-slate-700 px-6 text-center">
         {usuarioAutenticado ? (
           <>
             <h2
@@ -373,9 +503,8 @@ const Inicio = () => {
             >
               Publica tus recetas y sé la inspiración de nuestra comunidad.
             </p>
-
             <button
-              className="bg-white text-blue-500 px-8 py-3 rounded-full text-lg font-bold hover:scale-125 shadow-lg transition"
+              className="bg-white text-blue-900 px-8 py-3 rounded-full text-lg font-bold hover:scale-125 shadow-lg transition"
               onClick={() => navigate("/receta/crear-receta")}
             >
               Crear Receta
@@ -383,14 +512,18 @@ const Inicio = () => {
           </>
         ) : (
           <>
-            <h2 className="text-3xl font-bold mb-4 text-white">
+            <h2 className="text-3xl font-bold mb-4 text-white"
+            style={{ textShadow: "0 1px 3px rgba(0, 0, 0, 2)" }}
+            >
               ¿Listo para transformar tu cocina?
             </h2>
-            <p className="text-lg mb-6 text-white">
+            <p className="text-lg mb-6 text-white"
+            style={{ textShadow: "0 1px 3px rgba(0, 0, 0, 2)" }}
+            >
               Regístrate para descubrir recetas exclusivas, guardar tus favoritas y más.
             </p>
             <button
-              className="bg-white text-blue-500 px-8 py-3 rounded-full text-lg font-bold hover:bg-gray-100 shadow-lg transition"
+              className="bg-white text-blue-900 px-8 py-3 rounded-full text-lg font-bold hover:scale-125 shadow-lg transition"
               onClick={() => navigate("/registro")}
             >
               Regístrate Ahora

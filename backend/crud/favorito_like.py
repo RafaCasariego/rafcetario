@@ -4,6 +4,7 @@ Funciones CRUD para gestionar favoritos y likes de recetas
 
 from sqlalchemy.orm import Session
 from models import FavoritoLike, Receta
+from sqlalchemy.orm import joinedload
 
 # Agregar o quitar un favorito
 def toggle_favorito(db: Session, usuario_id: int, receta_id: int):
@@ -40,19 +41,13 @@ def toggle_like(db: Session, usuario_id: int, receta_id: int):
 def obtener_favoritos(db: Session, usuario_id: int):
     favoritos = (
         db.query(FavoritoLike)
+        .options(joinedload(FavoritoLike.receta))
         .filter(FavoritoLike.usuario_id == usuario_id, FavoritoLike.favorito == True)
         .all()
     )
-
     return {"usuario_id": usuario_id, "favoritos": favoritos}
 
 
 # Obtener todas las recetas a las que el usuario ha dado "me gusta"
 def contar_likes(db: Session, receta_id: int):
-    total_likes = (
-        db.query(FavoritoLike)
-        .filter(FavoritoLike.receta_id == receta_id, FavoritoLike.like == True)
-        .count()
-    )
-
-    return {"receta_id": receta_id, "total_likes": total_likes}
+    return db.query(FavoritoLike).filter_by(receta_id=receta_id, like=True).count()

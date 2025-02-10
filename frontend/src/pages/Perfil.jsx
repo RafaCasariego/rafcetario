@@ -35,7 +35,8 @@ const Perfil = () => {
       return;
     }
     const updatedUsuario = { ...usuario, nombre: newName };
-    actualizarUsuario(updatedUsuario).then(() => {
+    const token = localStorage.getItem("token");
+    actualizarUsuario(token, updatedUsuario).then(() => {
       setUsuario(updatedUsuario);
       alert("Nombre actualizado");
       setMostrarModalNombre(false);
@@ -52,7 +53,8 @@ const Perfil = () => {
       return;
     }
     const updatedUsuario = { ...usuario, email: newEmail };
-    actualizarUsuario(updatedUsuario).then(() => {
+    const token = localStorage.getItem("token");
+    actualizarUsuario(token, updatedUsuario).then(() => {
       setUsuario(updatedUsuario);
       alert("Email actualizado");
       setMostrarModalEmail(false);
@@ -64,6 +66,7 @@ const Perfil = () => {
       alert("Las nuevas contraseñas no coinciden");
       return;
     }
+    // Aquí podrías implementar la llamada a la API para cambiar la contraseña
     console.log("Contraseña cambiada", passwordData);
     alert("Contraseña actualizada");
     setMostrarModalContrasena(false);
@@ -74,6 +77,7 @@ const Perfil = () => {
       alert("Debes escribir 'Eliminar mi cuenta' para confirmar");
       return;
     }
+    // Aquí podrías llamar a la API para eliminar la cuenta
     console.log("Cuenta eliminada");
     alert("Cuenta eliminada");
     navigate("/");

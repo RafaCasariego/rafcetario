@@ -290,7 +290,7 @@ async def obtener_favoritos(usuario_id: int, db: Session = Depends(get_db)):
 
 
 
-# Obtener el total de likes de una receta
 @app.get("/recetas/{receta_id}/likes")
 async def contar_likes(receta_id: int, db: Session = Depends(get_db)):
-    return crud.favorito_like.contar_likes(db, receta_id)
+    count = crud.favorito_like.contar_likes(db, receta_id)
+    return {"count": count}
