@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { registrarUsuario } from "../services/api";
+import { registrarYLogear } from "../services/api";
 
 const Registro = () => {
   const [nombre, setNombre] = useState("");
@@ -10,11 +10,20 @@ const Registro = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const datosRegistro = { nombre, email, password };
-    await registrarUsuario(datosRegistro);
-    navigate("/login"); // Redirigir a la página de login después del registro
+  
+    try {
+      // Usamos la función combinada
+      const respuestaLogin = await registrarYLogear({ nombre, email, password });
+      
+      // Si el login es exitoso, se guarda el token y el usuario, así que redirigimos a la home
+      navigate("/");
+      window.location.reload()
+    } catch (error) {
+      console.error("Error durante el registro y login", error);
+      // Aquí maneja el error (mostrar mensaje, etc.)
+    }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">

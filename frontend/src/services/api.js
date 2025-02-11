@@ -90,6 +90,28 @@ export const registrarUsuario = async (datos) => {
 };
 
 
+// Registrar y logear un usuario de forma automática
+export const registrarYLogear = async (datos) => {
+  // Primero, registra al usuario enviando nombre, email y password (JSON)
+  await registrarUsuario({
+    nombre: datos.nombre,
+    email: datos.email,
+    password: datos.password,
+  });
+  
+  // Luego, inicia sesión automáticamente.
+  // La API espera en el login: grant_type, username y password (en URL-encoded)
+  const loginResponse = await iniciarSesion({
+    grant_type: "password",
+    username: datos.email,      // usamos el email como username
+    password: datos.password,
+  });
+  
+  // Ya en iniciarSesion se guarda el token y el perfil en localStorage
+  return loginResponse;
+};
+
+
 // Iniciar sesión
 export const iniciarSesion = async (credenciales) => {
   const response = await api.post("/login", new URLSearchParams(credenciales), {
@@ -164,5 +186,5 @@ export const obtenerLikes = async (receta_id) => {
   const response = await api.get(`/recetas/${receta_id}/likes`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data; // suponemos que la respuesta es { count: number }
+  return response.data;
 };
