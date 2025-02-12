@@ -5,26 +5,37 @@ import { iniciarSesion } from "../services/api";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(""); // Estado para el mensaje de error
   const navigate = useNavigate(); // Para redirigir después de iniciar sesión
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
+    // Verificar que se haya escrito un correo
+    if (!email.trim()) {
+      setError("Por favor, ingresa tu correo electrónico");
+      return;
+    } else {
+      setError(""); // Limpiar el error si se ingresa algo
+    }
+
     const credenciales = {
       username: email,
       password: password,
     };
-  
-    const response = await iniciarSesion(credenciales);
-    localStorage.setItem("token", response.access_token);
-    localStorage.setItem("usuario_id", response.usuario_id);
-    
-  
-    navigate("/"); // Redirige a la página de inicio después del login
-    window.location.reload(); // Recarga solo para actualizar el estado en el Navbar
+
+    try {
+      const response = await iniciarSesion(credenciales);
+      localStorage.setItem("token", response.access_token);
+      localStorage.setItem("usuario_id", response.usuario_id);
+      
+      navigate("/"); // Redirige a la página de inicio después del login
+      window.location.reload(); // Recarga para actualizar el estado en el Navbar
+    } catch (err) {
+      // Si hay un error en iniciar sesión, mostrar "Credenciales incorrectas"
+      setError("Credenciales incorrectas");
+    }
   };
-  
-  
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
@@ -36,8 +47,12 @@ const Login = () => {
           placeholder="Correo electrónico"
           className="mb-3 p-2 border rounded"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (e.target.value) setError(""); // Limpiar el error al escribir
+          }}
         />
+        {error && <p className="text-red-500 mb-3">{error}</p>}
         <input
           type="password"
           placeholder="Contraseña"
@@ -52,7 +67,9 @@ const Login = () => {
 
       <p className="mt-4">
         ¿No tienes cuenta?{" "}
-        <Link to="/registro" className="text-blue-500 hover:underline">Regístrate aquí</Link>
+        <Link to="/registro" className="text-blue-500 hover:underline">
+          Regístrate aquí
+        </Link>
       </p>
     </div>
   );

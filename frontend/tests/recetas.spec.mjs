@@ -1,10 +1,12 @@
 // tests/recetas.spec.js
 import { test, expect } from '@playwright/test';
 
+const BASE_URL = 'http://localhost:5173';
+
 test.describe('Tests de Recetas - Visualización, Creación, Edición, Favoritos y Eliminación', () => {
   
   test('Visualización y navegación de recetas', async ({ page }) => {
-    await page.goto('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/');
+    await page.goto(`${BASE_URL}/`);
     // Suponiendo que cada receta tenga la clase ".receta-item"
     const recetaItem = page.locator('.receta-item');
     await expect(recetaItem.first()).toBeVisible();
@@ -15,14 +17,14 @@ test.describe('Tests de Recetas - Visualización, Creación, Edición, Favoritos
   
   test('Crear nueva receta', async ({ page }) => {
     // Iniciar sesión
-    await page.goto('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/login');
+    await page.goto(`${BASE_URL}/login`);
     await page.getByPlaceholder('Correo electrónico').fill('usuario@example.com');
     await page.getByPlaceholder('Contraseña').fill('TestPassword123');
     await page.click('button[type="submit"]');
-    await page.waitForURL('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/');
+    await page.waitForURL(`${BASE_URL}/`);
     
     // Navegar a la sección de crear receta (por ejemplo, /nueva-receta)
-    await page.goto('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/nueva-receta');
+    await page.goto(`${BASE_URL}/nueva-receta`);
     await page.getByPlaceholder('Nombre de la receta').fill('Receta de Test');
     await page.getByPlaceholder('Descripción').fill('Descripción de la receta de test');
     // Completar otros campos necesarios si existen (ingredientes, instrucciones, etc.)
@@ -33,14 +35,14 @@ test.describe('Tests de Recetas - Visualización, Creación, Edición, Favoritos
   
   test('Editar una receta', async ({ page }) => {
     // Iniciar sesión
-    await page.goto('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/login');
+    await page.goto(`${BASE_URL}/login`);
     await page.getByPlaceholder('Correo electrónico').fill('usuario@example.com');
     await page.getByPlaceholder('Contraseña').fill('TestPassword123');
     await page.click('button[type="submit"]');
-    await page.waitForURL('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/');
+    await page.waitForURL(`${BASE_URL}/`);
     
     // Navegar a "Mis Recetas"
-    await page.goto('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/mis-recetas');
+    await page.goto(`${BASE_URL}/mis-recetas`);
     const recetaItem = page.locator('.receta-item');
     await recetaItem.first().click();
     // Hacer click en el botón "Editar" (asegúrate de que el selector coincide con el de tu app)
@@ -53,14 +55,14 @@ test.describe('Tests de Recetas - Visualización, Creación, Edición, Favoritos
   
   test('Guardar receta en favoritos', async ({ page }) => {
     // Iniciar sesión
-    await page.goto('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/login');
+    await page.goto(`${BASE_URL}/login`);
     await page.getByPlaceholder('Correo electrónico').fill('usuario@example.com');
     await page.getByPlaceholder('Contraseña').fill('TestPassword123');
     await page.click('button[type="submit"]');
-    await page.waitForURL('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/');
+    await page.waitForURL(`${BASE_URL}/`);
     
     // Navegar a la lista de recetas
-    await page.goto('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/recetas');
+    await page.goto(`${BASE_URL}/recetas`);
     const recetaItem = page.locator('.receta-item');
     await recetaItem.first().hover();
     // Suponiendo que existe un botón o icono con aria-label "Agregar a favoritos"
@@ -71,14 +73,14 @@ test.describe('Tests de Recetas - Visualización, Creación, Edición, Favoritos
   
   test('Eliminar una receta', async ({ page }) => {
     // Iniciar sesión
-    await page.goto('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/login');
+    await page.goto(`${BASE_URL}/login`);
     await page.getByPlaceholder('Correo electrónico').fill('usuario@example.com');
     await page.getByPlaceholder('Contraseña').fill('TestPassword123');
     await page.click('button[type="submit"]');
-    await page.waitForURL('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/');
+    await page.waitForURL(`${BASE_URL}/`);
     
     // Navegar a "Mis Recetas"
-    await page.goto('https://rafcetario-frontend-4d9llpz1b-rafacasariegos-projects.vercel.app/mis-recetas');
+    await page.goto(`${BASE_URL}/mis-recetas`);
     const recetaItem = page.locator('.receta-item');
     await recetaItem.first().hover();
     // Suponiendo que el botón de eliminar tiene aria-label "Eliminar Receta"

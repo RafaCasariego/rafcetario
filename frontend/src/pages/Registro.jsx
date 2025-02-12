@@ -6,24 +6,36 @@ const Registro = () => {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // Para redirigir después del registro
+  const [error, setError] = useState(""); // Estado para el mensaje de error
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setError(""); // Limpiar errores previos
+
     try {
       // Usamos la función combinada
-      const respuestaLogin = await registrarYLogear({ nombre, email, password });
+      await registrarYLogear({ nombre, email, password });
       
-      // Si el login es exitoso, se guarda el token y el usuario, así que redirigimos a la home
+      // Si el registro y login son exitosos, redirigimos a la home
       navigate("/");
-      window.location.reload()
-    } catch (error) {
-      console.error("Error durante el registro y login", error);
-      // Aquí maneja el error (mostrar mensaje, etc.)
+      window.location.reload();
+    } catch (err) {
+      console.error("Error durante el registro y login", err);
+      
+      // Extraer el mensaje de error desde la propiedad "detail"
+      const errorData = err.response?.data;
+      const errorMsg = String(errorData?.detail || "").trim();
+      console.log("Error message:", errorMsg);
+      
+      // Verificamos si el mensaje incluye "existe"
+      if (errorMsg.toLowerCase().includes("existe")) {
+        setError("Ese email ya está en uso");
+      } else {
+        setError("Error durante el registro. Inténtalo de nuevo.");
+      }
     }
   };
-  
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
@@ -51,6 +63,8 @@ const Registro = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        {/* Mostrar el mensaje de error si existe */}
+        {error && <p className="text-red-500 mb-3">{error}</p>}
         <button type="submit" className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
           Registrarse
         </button>
@@ -58,7 +72,9 @@ const Registro = () => {
 
       <p className="mt-4">
         ¿Ya tienes cuenta?{" "}
-        <Link to="/login" className="text-blue-500 hover:underline">Inicia sesión aquí</Link>
+        <Link to="/login" className="text-blue-500 hover:underline">
+          Inicia sesión aquí
+        </Link>
       </p>
     </div>
   );

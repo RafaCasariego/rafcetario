@@ -2,33 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos globales */
-html, body {
-    height: 100%;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  #root {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; /* Hace que la página ocupe toda la altura */
-  }
-  
-  /* Para que el contenido empuje al footer hacia abajo */
-  .main-content {
-    flex: 1;
-  }
-  
-  /* Estilos del footer */
-  .footer {
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  /* Asegúrate de que haya un margen inferior que sea la altura del footer */
+  margin: 0 0 70px; /* 100px: ajusta según la altura de tu footer */
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
 
 
-    text-align: center;
-    padding: 10px 0;
-    width: 100%;
-    position: relative; /* Por si acaso */
-    bottom: 0;
-  }
-  
+}

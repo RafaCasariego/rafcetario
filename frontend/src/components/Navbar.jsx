@@ -68,13 +68,13 @@ const Navbar = () => {
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuAbierto(!menuAbierto)}
-              className="bg-gray-200 text-blue-600 w-12 h-12 rounded-full flex items-center justify-center font-bold uppercase border-2 border-gray-200"
+              className="test-navbar-menu bg-gray-200 text-blue-600 w-12 h-12 rounded-full flex items-center justify-center font-bold uppercase border-2 border-gray-200"
             >
               {usuario.nombre[0]}
             </button>
 
             {menuAbierto && (
-              <div className="absolute right-0 mt-3 w-60 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
+              <div className="test-navbar-dropdown absolute right-0 mt-3 w-60 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
                 {/* Tarjeta de perfil */}
                 <div className="bg-blue-600 text-white p-4 flex flex-col items-center">
                   <div className="bg-white text-blue-600 w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold uppercase">
@@ -86,7 +86,7 @@ const Navbar = () => {
 
                 {/* Opciones del menú */}
                 <div className="flex flex-col p-2">
-                  <Link to="/perfil" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg text-gray-700">
+                  <Link to="/perfil" className="test-editarperfil-button flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg text-gray-700">
                     <FiEdit className="text-xl text-blue-600" />
                     Editar Perfil
                   </Link>
@@ -98,7 +98,7 @@ const Navbar = () => {
                     <FiHeart className="text-xl text-red-500" />
                     Mis Favoritos
                   </Link>
-                  <button onClick={cerrarSesion} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg text-red-600">
+                  <button onClick={cerrarSesion} className="test-cerrarsesion-button flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg text-red-600">
                     <FiLogOut className="text-xl" />
                     Cerrar Sesión
                   </button>
@@ -107,7 +107,7 @@ const Navbar = () => {
             )}
           </div>
         ) : (
-          <Link to="/login" className="flex items-center text-white hover:opacity-80 transition">
+          <Link to="/login" className="test-iniciarsesion-button flex items-center text-white hover:opacity-80 transition">
             <FaUser className="text-3xl" />
           </Link>
         )}

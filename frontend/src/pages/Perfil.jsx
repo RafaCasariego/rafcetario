@@ -92,7 +92,7 @@ const Perfil = () => {
           <div className="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-white text-3xl font-bold mb-4">
             {usuario && usuario.nombre ? usuario.nombre[0].toUpperCase() : "?"}
           </div>
-          <h2 className="text-2xl font-bold">
+          <h2 className="test-nombreusuario text-2xl font-bold">
             {usuario ? usuario.nombre : "Cargando..."}
           </h2>
           <p className="text-gray-600">{usuario ? usuario.email : ""}</p>
@@ -101,7 +101,7 @@ const Perfil = () => {
         {/* Sección 2: Opciones de acción */}
         <div className="flex flex-col gap-4">
           <button
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+            className="test-cambiarnombre-button bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
             onClick={() => setMostrarModalNombre(true)}
           >
             Cambiar Nombre
@@ -131,7 +131,7 @@ const Perfil = () => {
       {mostrarModalNombre && (
         <div
           id="modalFondo"
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          className="test-cambiarnombre-modal fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
           onClick={(e) => {
             if (e.target.id === "modalFondo") setMostrarModalNombre(false);
           }}
