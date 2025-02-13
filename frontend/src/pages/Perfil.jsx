@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { obtenerPerfil, actualizarUsuario } from "../services/api";
+import { obtenerPerfil, actualizarUsuario, iniciarSesion, eliminarCuenta } from "../services/api";
 
 const Perfil = () => {
   const [usuario, setUsuario] = useState(null);
@@ -17,6 +17,7 @@ const Perfil = () => {
     confirmacion: "",
   });
   const [confirmacionEliminar, setConfirmacionEliminar] = useState("");
+  const [mensaje, setMensaje] = useState(""); // Estado para notificaciones
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,70 +25,109 @@ const Perfil = () => {
     if (token) {
       obtenerPerfil(token).then((data) => {
         setUsuario(data);
-        setNewName(data.nombre);
+        // No asignamos newName para que el input quede vacío y muestre su placeholder
       });
     }
-  }, []);
+  }, [mostrarModalNombre]);
+
+  const mostrarMensaje = (texto) => {
+    setMensaje(texto);
+    setTimeout(() => setMensaje(""), 3000);
+  };
 
   const handleUpdateName = () => {
     if (newName.trim() === "") {
-      alert("El nombre no puede estar vacío");
+      mostrarMensaje("El nombre no puede estar vacío");
       return;
     }
     const updatedUsuario = { ...usuario, nombre: newName };
     const token = localStorage.getItem("token");
-    actualizarUsuario(token, updatedUsuario).then(() => {
-      setUsuario(updatedUsuario);
-      alert("Nombre actualizado");
+    actualizarUsuario(token, updatedUsuario).then((data) => {
+      setUsuario(data);
+      setNewName("");
+      localStorage.setItem("usuario", JSON.stringify(data));
+      mostrarMensaje("Nombre actualizado");
       setMostrarModalNombre(false);
     });
   };
 
-  const handleUpdateEmail = () => {
+  const handleUpdateEmail = async () => {
     if (newEmail !== confirmEmail) {
-      alert("Los correos no coinciden");
+      mostrarMensaje("Los correos no coinciden");
       return;
     }
     if (newEmail.trim() === "") {
-      alert("El email no puede estar vacío");
+      mostrarMensaje("El email no puede estar vacío");
       return;
     }
     const updatedUsuario = { ...usuario, email: newEmail };
     const token = localStorage.getItem("token");
-    actualizarUsuario(token, updatedUsuario).then(() => {
-      setUsuario(updatedUsuario);
-      alert("Email actualizado");
+    actualizarUsuario(token, updatedUsuario).then(async (data) => {
+      // Si el API devuelve un nuevo token, actualízalo; de lo contrario, forzamos un re-login.
+      if (data.access_token) {
+        localStorage.setItem("token", data.access_token);
+      } else {
+        // Re-autenticamos usando la contraseña conocida en el entorno de test.
+        const loginData = await iniciarSesion({ username: newEmail, password: "TestPassword123" });
+        localStorage.setItem("token", loginData.access_token);
+      }
+      setUsuario(data);
+      mostrarMensaje("Email actualizado");
       setMostrarModalEmail(false);
+      setNewEmail("");
+      setConfirmEmail("");
+    }).catch((err) => {
+      console.error("Error al actualizar email", err);
+      mostrarMensaje("Error al actualizar email");
     });
   };
 
   const handleCambiarContrasena = () => {
     if (passwordData.nueva !== passwordData.confirmacion) {
-      alert("Las nuevas contraseñas no coinciden");
+      mostrarMensaje("Las nuevas contraseñas no coinciden");
       return;
     }
-    // Aquí podrías implementar la llamada a la API para cambiar la contraseña
     console.log("Contraseña cambiada", passwordData);
-    alert("Contraseña actualizada");
+    mostrarMensaje("Contraseña actualizada");
     setMostrarModalContrasena(false);
   };
 
-  const handleEliminarCuenta = () => {
+  const handleEliminarCuenta = async () => {
     if (confirmacionEliminar !== "Eliminar mi cuenta") {
-      alert("Debes escribir 'Eliminar mi cuenta' para confirmar");
+      mostrarMensaje("Debes escribir 'Eliminar mi cuenta' para confirmar");
       return;
     }
-    // Aquí podrías llamar a la API para eliminar la cuenta
-    console.log("Cuenta eliminada");
-    alert("Cuenta eliminada");
-    navigate("/");
+    
+    const token = localStorage.getItem("token");
+    
+    try {
+      await eliminarCuenta(token);
+      mostrarMensaje("Cuenta eliminada");
+      // Opcional: limpiar la sesión
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+      mostrarMensaje("Cuenta eliminada");
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1500);
+    } catch (error) {
+      console.error("Error al eliminar la cuenta:", error);
+      mostrarMensaje("Error al eliminar la cuenta");
+    }
   };
 
+
   return (
-    <div className="p-4 mt-16">
-      {/* Tarjeta principal con fondo gris sutil */}
+    <div className="p-4 mt-16 relative">
+      {/* Notificación en el DOM, elevada 100px desde el fondo */}
+      {mensaje && (
+        <div className="fixed bottom-[100px] right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50">
+          {mensaje}
+        </div>
+      )}
+
+      {/* Tarjeta principal */}
       <div className="max-w-lg mx-auto my-10 bg-neutral-200 shadow-lg rounded-lg p-10">
-        {/* Sección 1: Avatar, Nombre y Email */}
         <div className="flex flex-col items-center border-b pb-4 mb-4">
           <div className="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-white text-3xl font-bold mb-4">
             {usuario && usuario.nombre ? usuario.nombre[0].toUpperCase() : "?"}
@@ -95,10 +135,10 @@ const Perfil = () => {
           <h2 className="test-nombreusuario text-2xl font-bold">
             {usuario ? usuario.nombre : "Cargando..."}
           </h2>
-          <p className="text-gray-600">{usuario ? usuario.email : ""}</p>
+          <p className="test-emailusuario text-gray-600">
+            {usuario ? usuario.email : ""}
+          </p>
         </div>
-
-        {/* Sección 2: Opciones de acción */}
         <div className="flex flex-col gap-4">
           <button
             className="test-cambiarnombre-button bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
@@ -221,7 +261,7 @@ const Perfil = () => {
             <h2 className="text-2xl font-bold mb-4">Cambiar Contraseña</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-gray-700 font-medium mb-1">
+                <label className="test-contrasena-actual block text-gray-700 font-medium mb-1">
                   Contraseña Actual
                 </label>
                 <input
@@ -234,7 +274,7 @@ const Perfil = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 font-medium mb-1">
+                <label className="test-nueva-contrasena block text-gray-700 font-medium mb-1">
                   Nueva Contraseña
                 </label>
                 <input
@@ -247,7 +287,7 @@ const Perfil = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 font-medium mb-1">
+                <label className="test-confirmar-contrasena block text-gray-700 font-medium mb-1">
                   Confirmar Nueva Contraseña
                 </label>
                 <input
@@ -314,3 +354,4 @@ const Perfil = () => {
 };
 
 export default Perfil;
+

@@ -323,7 +323,7 @@ const Inicio = () => {
           className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
           onClick={handleCerrarModal}
         >
-          <div className="bg-white p-8 rounded-lg max-w-xl w-full relative shadow-xl">
+          <div className="bg-white p-8 rounded-lg max-w-xl w-full max-h-[80vh] overflow-y-auto relative shadow-xl">
             {/* Botón de cerrar */}
             <button
               className="absolute top-4 right-4 text-black text-xs font-extrabold hover:text-red-500"

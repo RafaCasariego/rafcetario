@@ -156,6 +156,16 @@ export const actualizarUsuario = async (token, datos) => {
 }
 
 
+// Función para eliminar la cuenta del usuario
+export const eliminarCuenta = async (token) => {
+  const response = await api.delete("/perfil", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+
+
 // Agregar la receta en favoritos
 export const toggle_favorito = async (receta_id) => {
   const token = localStorage.getItem("token");
