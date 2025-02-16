@@ -126,7 +126,7 @@ async def crear_receta(
             tiempo_minutos=tiempo_minutos,
         ),
         usuario_actual,
-        imagen_url=imagen_url  # 🔥 PASA la URL correcta aquí
+        imagen_url=imagen_url  
 )
 
     return nueva_receta

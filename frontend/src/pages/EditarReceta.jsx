@@ -43,7 +43,7 @@ const EditarReceta = () => {
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Editar Receta</h1>
       <form onSubmit={handleSubmit} className="flex flex-col flex-1">
         {/* Área de campos que se expande y permite scroll */}
-        <div className="flex flex-col gap-3 flex-1 overflow-y-auto">
+        <div className="test-editar-nombre flex flex-col gap-3 flex-1 overflow-y-auto">
           <input
             type="text"
             name="nombre"

@@ -236,7 +236,7 @@ const Inicio = () => {
             recetasPaginadas.map((receta) => (
               <div
                 key={receta.id}
-                className="bg-neutral-200 border-gray-500 drop-shadow-md rounded-lg overflow-hidden transform transition hover:scale-105 cursor-pointer"
+                className="test-receta-item bg-neutral-200 border-gray-500 drop-shadow-md rounded-lg overflow-hidden transform transition hover:scale-105 cursor-pointer"
                 onClick={() => setModalReceta(receta)}
               >
                 <img
@@ -326,7 +326,7 @@ const Inicio = () => {
           <div className="bg-white p-8 rounded-lg max-w-xl w-full max-h-[80vh] overflow-y-auto relative shadow-xl">
             {/* Botón de cerrar */}
             <button
-              className="absolute top-4 right-4 text-black text-xs font-extrabold hover:text-red-500"
+              className="test-cerrar-modal absolute top-4 right-4 text-black text-xs font-extrabold hover:text-red-500"
               onClick={() => setModalReceta(null)}
             >
               &#10005;
@@ -365,7 +365,7 @@ const Inicio = () => {
             <div className="flex justify-end gap-6">
               {/* Botón para ver la receta */}
               <button
-                className="flex items-center bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition"
+                className="test-ver-receta flex items-center bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition"
                 onClick={() => {
                   navigate(`/receta/${modalReceta.id}`);
                   setModalReceta(null);

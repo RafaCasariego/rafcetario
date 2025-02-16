@@ -115,7 +115,7 @@ const RecetaDetalle = () => {
       <div className="max-w-3xl mx-auto bg-neutral-200 shadow-lg rounded-lg p-10">
         {/* Título y Descripción */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">{receta.nombre}</h1>
+          <h1 className="test-titulo-receta text-4xl font-bold text-gray-800 mb-4">{receta.nombre}</h1>
           <p className="text-black text-lg">{receta.descripcion}</p>
         </div>
 
@@ -151,7 +151,7 @@ const RecetaDetalle = () => {
         <div className="flex justify-end gap-4 mt-6">
           <button
             onClick={handleLike}
-            className="flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition"
+            className="test-like-button flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition"
           >
             {like ? (
               <>
@@ -185,7 +185,7 @@ const RecetaDetalle = () => {
 
           <button
             onClick={handleFavorito}
-            className="flex items-center gap-2 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition"
+            className="test-favorite-button flex items-center gap-2 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
