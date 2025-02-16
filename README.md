@@ -1,7 +1,9 @@
 # Rafcetario 🍽️
 
 Rafcetario es una aplicación web para compartir recetas de cocina, donde los usuarios pueden explorar, buscar y ver recetas en detalle.  
-**¡La API ha sido desarrollada desde cero con FastAPI!**  
+**¡La API ha sido desarrollada desde cero con FastAPI!**
+
+**API DOCS: 'https://rafcetario-api.vercel.app/docs'**
 
 ---
 
