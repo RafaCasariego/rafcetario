@@ -1,7 +1,7 @@
 // tests/navegacionRecetas.spec.js
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:5173';
+const BASE_URL = 'https://rafcetario-frontend-d0xik1qbf-rafacasariegos-projects.vercel.app';
 
 test.describe('Tests de recetas - Navegación, crear, modificar, eliminar, like, favorito...', () => {
 
@@ -68,6 +68,7 @@ test.describe('Tests de recetas - Navegación, crear, modificar, eliminar, like,
     const favButton = page.locator('.test-favorite-button');
     await expect(favButton).toHaveText("Favorito"); // Verificar que el botón inicialmente dice "Favorito"
     await favButton.click();
+    await page.waitForTimeout(1000);
     await expect(favButton).toHaveText("Eliminar de Favoritos"); // Verificar que cambió a "Eliminar de Favoritos"
   
     // Quitar de favoritos
@@ -98,6 +99,7 @@ test('Crear, editar y eliminar una receta', async ({ page }) => {
 
 
   // Verificar que hemos sido redirigidos a /mis-recetas y la nueva receta está listada
+  await page.waitForTimeout(1000);
   await page.waitForURL(`${BASE_URL}/mis-recetas`);
   await expect(page.locator('.test-receta-item:has-text("Receta de Prueba")')).toBeVisible();
 
@@ -131,6 +133,7 @@ test('Crear, editar y eliminar una receta', async ({ page }) => {
   await confirmarEliminar.click();
 
   // Esperar el mensaje de confirmación en el DOM
+  await page.waitForTimeout(700);
   await expect(page.locator('text=Receta eliminada correctamente')).toBeVisible();
 
   // Esperar que la receta ya no esté en la lista

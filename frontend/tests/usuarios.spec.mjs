@@ -1,7 +1,7 @@
 // tests/usuarios.spec.js
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:5173';
+const BASE_URL = 'https://rafcetario-frontend-d0xik1qbf-rafacasariegos-projects.vercel.app';
 
 test.describe('Tests de Usuarios - Registro, Login, Logout y Validaciones', () => {
   
